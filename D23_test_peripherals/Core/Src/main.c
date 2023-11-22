@@ -130,8 +130,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	HAL_UART_Transmit(&huart1, test, 20, 0xFFFF);
-	HAL_Delay(500);
 
   }
   /* USER CODE END 3 */
