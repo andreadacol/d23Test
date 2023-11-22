@@ -121,7 +121,6 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -131,6 +130,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	HAL_UART_Transmit(&huart1, test, 20, 0xFFFF);
+	HAL_Delay(500);
 
   }
   /* USER CODE END 3 */
@@ -506,7 +507,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 38400;
+  huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
