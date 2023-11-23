@@ -8,14 +8,14 @@
 #ifndef SRC_APP_TEST_H_
 #define SRC_APP_TEST_H_
 
-
+#include <main.h>
 /**************************************************************************
  functions
 **************************************************************************/
 
 void app_test_GPO_CN49_start (void);
 void app_test_GPO_CN49_stop (void);
-
+void app_test_GPO_CN49_square(uint32_t time);
 
 
 

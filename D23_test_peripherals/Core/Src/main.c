@@ -101,6 +101,7 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
+  HAL_InitTick(TICK_INT_PRIORITY);
 
   /* USER CODE BEGIN SysInit */
 
@@ -129,6 +130,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  app_term_manager_state_machine();
+	  app_test_GPO_CN49_square(0);
   }
   /* USER CODE END 3 */
 }

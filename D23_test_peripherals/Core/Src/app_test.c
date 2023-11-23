@@ -55,3 +55,31 @@ void app_test_GPO_CN49_stop (void) {
 						  |GPIO_PIN_11, GPIO_PIN_RESET);
 
 }
+
+void app_test_GPO_CN49_square(uint32_t time) {
+
+    if (time == 0) {
+        // Assign a default value if time is NULL
+        time = 500;
+    }
+
+    static uint32_t lastExecutionTime = 0;
+    uint32_t currentTime = HAL_GetTick();
+
+    static uint8_t phase = 0;
+
+    // Check if the specified time has elapsed since the last execution
+    if ((currentTime - lastExecutionTime) >= time) {
+        // Toggle the state
+        if (phase) {
+            app_test_GPO_CN49_start();
+            phase = 0;
+        } else {
+            app_test_GPO_CN49_stop();
+            phase = 1;
+        }
+
+        // Update the last execution time
+        lastExecutionTime = currentTime;
+    }
+}
