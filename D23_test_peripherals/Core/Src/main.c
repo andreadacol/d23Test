@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app_test.h"
+#include "app_term_manager.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,23 +39,6 @@
 /* USER CODE BEGIN PM */
 
 /* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-CAN_HandleTypeDef hcan;
-
-I2C_HandleTypeDef hi2c1;
-I2C_HandleTypeDef hi2c2;
-
-SPI_HandleTypeDef hspi2;
-
-TIM_HandleTypeDef htim1;
-
-UART_HandleTypeDef huart5;
-UART_HandleTypeDef huart1;
-UART_HandleTypeDef huart2;
-UART_HandleTypeDef huart3;
-
-PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
 
@@ -79,7 +63,21 @@ static void MX_USB_PCD_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+CAN_HandleTypeDef hcan;
 
+I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
+
+SPI_HandleTypeDef hspi2;
+
+TIM_HandleTypeDef htim1;
+
+UART_HandleTypeDef huart5;
+UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart3;
+
+PCD_HandleTypeDef hpcd_USB_FS;
 /* USER CODE END 0 */
 
 /**
@@ -130,7 +128,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
+	  app_term_manager_state_machine();
   }
   /* USER CODE END 3 */
 }
