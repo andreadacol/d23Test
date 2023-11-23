@@ -40,6 +40,23 @@
 
 /* USER CODE END PM */
 
+/* Private variables ---------------------------------------------------------*/
+CAN_HandleTypeDef hcan;
+
+I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
+
+SPI_HandleTypeDef hspi2;
+
+TIM_HandleTypeDef htim1;
+
+UART_HandleTypeDef huart5;
+UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart3;
+
+PCD_HandleTypeDef hpcd_USB_FS;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -120,6 +137,11 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
+//
+//  while (1) {
+
+//  HAL_Delay(500);
+//  }
   /* USER CODE END 2 */
 
   /* Infinite loop */

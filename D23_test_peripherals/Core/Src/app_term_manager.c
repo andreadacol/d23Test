@@ -7,6 +7,10 @@
 /**************************************************************************
  includes
 **************************************************************************/
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+
 #include "app_test.h"
 #include "main.h"
 
@@ -21,6 +25,10 @@
 #define CMD_HELP 	"help"
 #define CMD_GPO 	"gpo"
 
+
+#define CHAR_BACKSPACE  0x08
+#define CHAR_RETURN		0x0D
+#define CHAR_SPACE		0x20
 
 /**************************************************************************
  typedef
@@ -37,19 +45,73 @@ typedef enum {
  global vars
 **************************************************************************/
 extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart5;
 
 /**************************************************************************
- private functions
+ private functions - send functions
 **************************************************************************/
-bool _app_term_cmd () {
-	bool ret = false;
-
-    if ( memcmp(rcvData, CMD_HELP, sizeof(CMD_HELP)) == 0 ) {
-
-    }
-	return ret;
+static void _send_header (void) {
+	uint8_t header[3] = ">: ";
+	HAL_UART_Transmit(&huart1, header, 3, 0xFFFF);
 }
 
+static void _send_new_line (void) {
+	HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n", 2, 0xFFFF);
+}
+
+static void _send_data (uint8_t * data, uint16_t size ) {
+	HAL_UART_Transmit(&huart1, data, size, 0xFFFF);
+}
+
+/**************************************************************************
+ private functions - cmd description
+**************************************************************************/
+static void _usages_cmd (void) {
+
+	uint8_t cmd0[] = "Commands: \r\n";
+	uint8_t cmd1[] = "	gpo		enable-disable all output gpios (gpo start stop) \r\n";
+	uint8_t cmd2[] = "	gpi		read current state of all input gpios \r\n";
+
+	_send_data(cmd0, sizeof(cmd0));
+	_send_data(cmd1, sizeof(cmd1));
+	_send_data(cmd2, sizeof(cmd2));
+	_send_new_line();
+}
+
+/**************************************************************************
+ private functions - command manager
+**************************************************************************/
+static bool _app_term_cmd (uint8_t * data) {
+	bool ret = false;
+	_send_new_line();
+
+    if ( memcmp(data, CMD_HELP, sizeof(CMD_HELP)) == 0 ) {
+    	_usages_cmd();
+    	ret = true;
+    }
+    else if ( memcmp(data, CMD_GPO, sizeof(CMD_GPO)) == 0  ) {
+//    	uint8_t cnt = 0;
+//    	do {
+//    		if(data[sizeof[CMD_GPIO] != CHAR_SPACE]) {
+//    			break;
+//    		}
+//    		else
+//
+//
+//    	} while
+    }
+
+
+	if (!ret) {
+		if (data[0] != 0x00) {
+			_send_data((uint8_t*)"Unknown command! \r\n", 17);
+			_send_new_line();
+		}
+		_send_header();
+	}
+
+	return ret;
+}
 
 /**************************************************************************
  functions
@@ -60,39 +122,53 @@ void app_term_manager_state_machine (void) {
 	static uint8_t rcvData[MAX_LEN];
 	static uint8_t * rcvDataPtr = NULL;
 
-	if( rcvDataPtr == NULL ) {
-		rcvDataPtr = rcvData;
-	}
+	static bool first_time = true;
 
 	uint8_t singleData = 0;
 
+	if (rcvDataPtr == NULL) {
+		rcvDataPtr = rcvData;
+	}
+
+	if (first_time) {
+		_send_data((uint8_t*)"\r\nD23 -- TEST STM32\r\n", 22);
+		_send_header();
+		first_time = false;
+	}
+
+	// checking received data from terminal
 	HAL_UART_Receive(&huart1, &singleData, 1, 0xFF);
 
-	if ((singleData == 0x08) && (pos != 0)) {
+	// backspace command received
+	if ((singleData == CHAR_BACKSPACE) && (pos != 0)) {
+
+		_send_data((uint8_t*)"\b \b", 3);
+
 		rcvDataPtr--;
 		pos--;
-		HAL_UART_Transmit(&huart1, (uint8_t*)"\b \b", 3, 0xFF);
 	}
-	else if ( singleData == 0x0D ) {
+	else if ( singleData == CHAR_RETURN ) {
 		rcvDataPtr++;
 		*rcvDataPtr = '\0';
 
+		// parsing received command
 		_app_term_cmd(rcvData);
 
-	    HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n", 2, 0xFF);
 	    rcvDataPtr = rcvData;
 	    pos = 0;
+	    memset(rcvData, 0x00, sizeof(rcvData));
 	}
 	else {
 		if ( singleData != 0 ) {
 			*rcvDataPtr = singleData;
+
+			// print back received character on terminal
+			_send_data(&singleData, 1);
+
 			rcvDataPtr++;
 			pos++;
-			HAL_UART_Transmit(&huart1, &singleData, 1, 0xFF);
 		}
 
 	}
-
-	//HAL_UART_Transmit(&huart1, &rcvData, 1, 0xFF);
 
 }
