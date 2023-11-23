@@ -16,6 +16,7 @@
 void app_test_GPO_CN49_start (void);
 void app_test_GPO_CN49_stop (void);
 void app_test_GPO_CN49_square(uint32_t time);
+uint8_t app_test_GPO_CN50_square(uint32_t time);
 
 
 

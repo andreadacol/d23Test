@@ -83,3 +83,50 @@ void app_test_GPO_CN49_square(uint32_t time) {
         lastExecutionTime = currentTime;
     }
 }
+
+uint8_t app_test_GPO_CN50_square(uint32_t time) {
+
+	static uint32_t pinMask = 0;
+	uint8_t bitmask = 0;
+	uint32_t newPinMask = 0;
+	uint8_t ret = 0;
+
+    if (time == 0) {
+        // Assign a default value if time is NULL
+        time = 500;
+    }
+
+
+    static uint32_t lastExecutionTime = 0;
+    uint32_t currentTime = HAL_GetTick();
+    if ((currentTime - lastExecutionTime) <= time) return 2;
+    lastExecutionTime = currentTime;
+
+    // Check if the specified time has elapsed since the last execution
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_9);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_1);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_0);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_1);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_6);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_8);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_9);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_10);	bitmask ++;
+
+    if ((pinMask & newPinMask) == 0) {
+    	ret = 1;
+    } else {
+    	printf("error on GPI, untoggled pin mask %d\n", !(pinMask & newPinMask));
+    }
+
+    pinMask = newPinMask;
+
+    return ret;
+}
