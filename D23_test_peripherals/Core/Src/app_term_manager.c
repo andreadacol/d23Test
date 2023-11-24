@@ -78,6 +78,33 @@ static void _usages_cmd (void) {
 	_send_new_line();
 }
 
+static bool _gpo_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	do {
+		if ( data[sizeof(CMD_GPO)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_GPO)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_GPO_CN49_start();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_GPO)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_GPO_CN49_stop();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
 /**************************************************************************
  private functions - command manager
 **************************************************************************/
@@ -85,20 +112,12 @@ static bool _app_term_cmd (uint8_t * data) {
 	bool ret = false;
 	_send_new_line();
 
-    if ( memcmp(data, CMD_HELP, sizeof(CMD_HELP)) == 0 ) {
+    if ( memcmp(data, CMD_HELP, sizeof(CMD_HELP)-1) == 0 ) {
     	_usages_cmd();
     	ret = true;
     }
-    else if ( memcmp(data, CMD_GPO, sizeof(CMD_GPO)) == 0  ) {
-//    	uint8_t cnt = 0;
-//    	do {
-//    		if(data[sizeof[CMD_GPIO] != CHAR_SPACE]) {
-//    			break;
-//    		}
-//    		else
-//
-//
-//    	} while
+    else if ( memcmp(data, CMD_GPO, sizeof(CMD_GPO)-1) == 0  ) {
+    	ret = _gpo_cmd(data);
     }
 
 
