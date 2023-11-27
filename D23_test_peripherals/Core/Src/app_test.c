@@ -13,10 +13,28 @@
 /**************************************************************************
  global vars
 **************************************************************************/
+extern UART_HandleTypeDef huart3;
 
+app_test_typedef _test = {
+	.gpo_cn49_square = false,
+	.gpi_cn50_square = false,
+
+};
 /**************************************************************************
  functions
 **************************************************************************/
+void app_test_GPO_CN49_set (bool var) {
+	_test.gpo_cn49_square = var;
+}
+
+void app_test_GPI_CN50_set (bool var) {
+	_test.gpi_cn50_square = var;
+}
+
+void app_test_UART_CN48_set (bool var) {
+	_test.uart_cn48 = var;
+}
+
 void app_test_GPO_CN49_start (void) {
 
 	/*Configure GPIO pin Output Level */
@@ -55,7 +73,7 @@ void app_test_GPO_CN49_stop (void) {
 						  |GPIO_PIN_11, GPIO_PIN_RESET);
 }
 
-uint32_t app_test_GPO_CN50_read (void) {
+uint32_t app_test_GPI_CN50_read (void) {
 
 	uint8_t bitmask = 0;
 	uint32_t newPinMask = 0;
@@ -109,7 +127,7 @@ void app_test_GPO_CN49_square(uint32_t time) {
     }
 }
 
-uint8_t app_test_GPO_CN50_square(uint32_t time) {
+uint8_t app_test_GPI_CN50_square(uint32_t time) {
 
 	static uint32_t pinMask = 0;
 	uint8_t bitmask = 0;
@@ -154,4 +172,49 @@ uint8_t app_test_GPO_CN50_square(uint32_t time) {
     pinMask = newPinMask;
 
     return ret;
+}
+
+uint8_t app_test_UART_CN48_test(uint32_t time) {
+
+	uint8_t ret = 0;
+	uint8_t test[] = "Hello World!";
+	uint8_t singleData = 0;
+
+    if (time == 0) {
+        // Assign a default value if time is NULL
+        time = 500;
+    }
+
+    static uint32_t lastExecutionTime = 0;
+    uint32_t currentTime = HAL_GetTick();
+    if ((currentTime - lastExecutionTime) > time) {
+		lastExecutionTime = currentTime;
+
+		HAL_UART_Transmit(&huart3, test, sizeof(test), 0xFFFF );
+    }
+    else {
+    	if (HAL_UART_Receive(&huart3, &singleData, 1, 0xFF) == HAL_OK) {
+    		if (singleData != 0) {
+    			ret = 1;
+    			printf("%d\n", singleData);
+    		}
+    	}
+    }
+
+    return ret;
+}
+
+
+void app_test_manager_sm (void) {
+
+	if (_test.gpo_cn49_square) {
+		app_test_GPO_CN49_square(0);
+	}
+	if (_test.gpi_cn50_square) {
+		app_test_GPI_CN50_square(0);
+	}
+	if (_test.uart_cn48) {
+		app_test_UART_CN48_test(0);
+	}
+
 }

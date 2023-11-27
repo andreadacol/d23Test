@@ -7,31 +7,30 @@
 /**************************************************************************
  includes
 **************************************************************************/
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-
 #include "app_test.h"
 #include "main.h"
+#include "app_term_manager.h"
 
 /**************************************************************************
  defines
 **************************************************************************/
-#define MAX_LEN 		30
+#define MAX_LEN 			30
 
-#define CMD_START 	 	"start"
-#define CMD_STOP  	 	"stop"
+#define CMD_START 	 		"start"
+#define CMD_STOP  	 		"stop"
 
-#define CMD_READ 		"read"
+#define CMD_READ 			"read"
 
-#define CMD_HELP 	 	"help"
-#define CMD_GPO 	 	"gpo"
-#define CMD_GPI 	 	"gpi"
+#define CMD_HELP 		 	"help"
+#define CMD_GPO_CN49 	 	"gpo"
+#define CMD_GPI_CN50 	 	"gpi"
+#define CMD_GPO_CN49_SQUARE	"gpo_square"
+#define CMD_GPI_CN50_SQUARE	"gpi_square"
+#define CMD_UART_CN48		"serialCN48"
 
-
-#define CHAR_BACKSPACE  0x08
-#define CHAR_RETURN		0x0D
-#define CHAR_SPACE		0x20
+#define CHAR_BACKSPACE  	0x08
+#define CHAR_RETURN			0x0D
+#define CHAR_SPACE			0x20
 
 /**************************************************************************
  typedef
@@ -40,6 +39,8 @@ typedef enum {
 	APP_TERM_COMMAND_NONE = 0x00,
 	APP_TERM_COMMAND_GPO_CN49,
 	APP_TERM_COMMAND_GPI_CN50,
+	APP_TERM_COMMAND_GPO_CN49_SQUARE,
+	APP_TERM_COMMAND_GPI_CN50_SQUARE,
 
 } app_term_command_enum_t;
 
@@ -72,12 +73,18 @@ static void _send_data (uint8_t * data, uint16_t size ) {
 static void _usages_cmd (void) {
 
 	uint8_t cmd0[] = "Commands: \r\n";
-	uint8_t cmd1[] = "	gpo		enable-disable all output gpios (gpo start stop) \r\n";
-	uint8_t cmd2[] = "	gpi		read current state of all input gpios \r\n";
+	uint8_t cmd1[] = "	gpo			enable-disable all output gpios (gpo start stop) \r\n";
+	uint8_t cmd2[] = "	gpi			read current state of all input gpios \r\n";
+	uint8_t cmd3[] = "	gpo_square	enable-disable square output at 1 Hz (gpo_square start stop)\r\n";
+	uint8_t cmd4[] = "	gpi_square	read current state of all input gpios at 1 Hz (gpi_square start stop) \r\n";
+	uint8_t cmd5[] = "	serialCN48	start stop  \r\n";
 
 	_send_data(cmd0, sizeof(cmd0));
 	_send_data(cmd1, sizeof(cmd1));
 	_send_data(cmd2, sizeof(cmd2));
+	_send_data(cmd3, sizeof(cmd3));
+	_send_data(cmd4, sizeof(cmd4));
+	_send_data(cmd5, sizeof(cmd5));
 	_send_new_line();
 }
 
@@ -89,7 +96,7 @@ static bool _gpo_cmd (uint8_t *data) {
 	uint8_t stop_msg[] = "GPO start command received: all gpos are stopped \r\n";
 
 	do {
-		if ( data[sizeof(CMD_GPO)-1+cnt] != CHAR_SPACE ) {
+		if ( data[sizeof(CMD_GPO_CN49)-1+cnt] != CHAR_SPACE ) {
 			break;
 		}
 		cnt++;
@@ -97,13 +104,13 @@ static bool _gpo_cmd (uint8_t *data) {
 
 	// check for commands:
 	if (cnt != 0) {
-		if (memcmp(&data[sizeof(CMD_GPO)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+		if (memcmp(&data[sizeof(CMD_GPO_CN49)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
 			app_test_GPO_CN49_start();
 			_send_data(start_msg, sizeof(start_msg));
 			_send_header();
 			ret = true;
 		}
-		else if (memcmp(&data[sizeof(CMD_GPO)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+		else if (memcmp(&data[sizeof(CMD_GPO_CN49)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
 			app_test_GPO_CN49_stop();
 			_send_data(stop_msg, sizeof(stop_msg));
 			_send_header();
@@ -122,7 +129,7 @@ static bool _gpi_cmd (uint8_t *data) {
 	uint8_t read_msg[30] = {0};
 
 	do {
-		if ( data[sizeof(CMD_GPO)-1+cnt] != CHAR_SPACE ) {
+		if ( data[sizeof(CMD_GPI_CN50)-1+cnt] != CHAR_SPACE ) {
 			break;
 		}
 		cnt++;
@@ -131,8 +138,8 @@ static bool _gpi_cmd (uint8_t *data) {
 
 	// check for commands:
 	if (cnt != 0) {
-		if (memcmp(&data[sizeof(CMD_GPO)-1+cnt], CMD_READ, sizeof(CMD_READ)-1) == 0) {
-			pinMask = app_test_GPO_CN50_read();
+		if (memcmp(&data[sizeof(CMD_GPI_CN50)-1+cnt], CMD_READ, sizeof(CMD_READ)-1) == 0) {
+			pinMask = app_test_GPI_CN50_read();
 			sprintf((char *)read_msg, "GPI read mask: %d", (int)pinMask);
 			_send_data(read_msg, sizeof(read_msg));
 			_send_new_line();
@@ -143,6 +150,106 @@ static bool _gpi_cmd (uint8_t *data) {
 
 	return ret;
 }
+
+static bool _gpo_square_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "GPO square test enabled \r\n";
+	uint8_t disable_msg[] = "GPO square test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_GPO_CN49_SQUARE)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_GPO_CN49_SQUARE)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_GPO_CN49_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_GPO_CN49_SQUARE)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_GPO_CN49_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+static bool _gpi_square_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "GPI square test enabled \r\n";
+	uint8_t disable_msg[] = "GPI square test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_GPI_CN50_SQUARE)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_GPI_CN50_SQUARE)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_GPI_CN50_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_GPI_CN50_SQUARE)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_GPI_CN50_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+static bool _uart_cn48_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "SERIAL CN48 test enabled \r\n";
+	uint8_t disable_msg[] = "SERIAL CN48  test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_UART_CN48)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_UART_CN48)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_GPI_CN50_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_UART_CN48)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_GPI_CN50_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
 
 /**************************************************************************
  private functions - command manager
@@ -155,11 +262,20 @@ static bool _app_term_cmd (uint8_t * data) {
     	_usages_cmd();
     	ret = true;
     }
-    else if ( memcmp(data, CMD_GPO, sizeof(CMD_GPO)-1) == 0  ) {
+    else if ( memcmp(data, CMD_GPO_CN49, sizeof(CMD_GPO_CN49)-1) == 0  ) {
     	ret = _gpo_cmd(data);
     }
-    else if ( memcmp(data, CMD_GPI, sizeof(CMD_GPI)-1) == 0  ) {
+    else if ( memcmp(data, CMD_GPI_CN50, sizeof(CMD_GPI_CN50)-1) == 0  ) {
     	ret = _gpi_cmd(data);
+    }
+    else if ( memcmp(data, CMD_GPO_CN49_SQUARE, sizeof(CMD_GPO_CN49_SQUARE)-1) == 0  ) {
+    	ret = _gpo_square_cmd(data);
+    }
+    else if ( memcmp(data, CMD_GPI_CN50_SQUARE, sizeof(CMD_GPI_CN50_SQUARE)-1) == 0  ) {
+    	ret = _gpi_square_cmd(data);
+    }
+    else if ( memcmp(data, CMD_UART_CN48, sizeof(CMD_UART_CN48)-1) == 0  ) {
+    	ret = _uart_cn48_cmd(data);
     }
 
 	if (!ret) {
@@ -176,7 +292,7 @@ static bool _app_term_cmd (uint8_t * data) {
 /**************************************************************************
  functions
 **************************************************************************/
-void app_term_manager_state_machine (void) {
+void app_term_manager_sm (void) {
 
 	static uint8_t pos = 0;
 	static uint8_t rcvData[MAX_LEN];

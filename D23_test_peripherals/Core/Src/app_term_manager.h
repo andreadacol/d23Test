@@ -12,11 +12,14 @@
  include
 **************************************************************************/
 #include "main.h"
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 
 /**************************************************************************
  functions
 **************************************************************************/
-void app_term_manager_state_machine (void);
+void app_term_manager_sm (void);
 
 
 
