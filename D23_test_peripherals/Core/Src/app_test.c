@@ -53,7 +53,32 @@ void app_test_GPO_CN49_stop (void) {
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_10
 						  |GPIO_PIN_11, GPIO_PIN_RESET);
+}
 
+uint32_t app_test_GPO_CN50_read (void) {
+
+	uint8_t bitmask = 0;
+	uint32_t newPinMask = 0;
+
+    // Check if the specified time has elapsed since the last execution
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_9);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_1);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_0);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_1);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_6);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_8);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_9);	bitmask ++;
+	newPinMask += bitmask * HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_10);	bitmask ++;
+
+    return newPinMask;
 }
 
 void app_test_GPO_CN49_square(uint32_t time) {

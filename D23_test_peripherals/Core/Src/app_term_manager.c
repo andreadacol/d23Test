@@ -17,13 +17,16 @@
 /**************************************************************************
  defines
 **************************************************************************/
-#define MAX_LEN 30
+#define MAX_LEN 		30
 
-#define CMD_START 	"start"
-#define CMD_STOP  	"stop"
+#define CMD_START 	 	"start"
+#define CMD_STOP  	 	"stop"
 
-#define CMD_HELP 	"help"
-#define CMD_GPO 	"gpo"
+#define CMD_READ 		"read"
+
+#define CMD_HELP 	 	"help"
+#define CMD_GPO 	 	"gpo"
+#define CMD_GPI 	 	"gpi"
 
 
 #define CHAR_BACKSPACE  0x08
@@ -82,6 +85,42 @@ static bool _gpo_cmd (uint8_t *data) {
 	bool ret = false;
 	uint8_t cnt = 0;
 
+	uint8_t start_msg[] = "GPO start command received: all gpos are enabled \r\n";
+	uint8_t stop_msg[] = "GPO start command received: all gpos are stopped \r\n";
+
+	do {
+		if ( data[sizeof(CMD_GPO)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_GPO)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_GPO_CN49_start();
+			_send_data(start_msg, sizeof(start_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_GPO)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_GPO_CN49_stop();
+			_send_data(stop_msg, sizeof(stop_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+static bool _gpi_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+	uint32_t pinMask = 0;
+
+	uint8_t read_msg[30] = {0};
+
 	do {
 		if ( data[sizeof(CMD_GPO)-1+cnt] != CHAR_SPACE ) {
 			break;
@@ -92,12 +131,12 @@ static bool _gpo_cmd (uint8_t *data) {
 
 	// check for commands:
 	if (cnt != 0) {
-		if (memcmp(&data[sizeof(CMD_GPO)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
-			app_test_GPO_CN49_start();
-			ret = true;
-		}
-		else if (memcmp(&data[sizeof(CMD_GPO)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
-			app_test_GPO_CN49_stop();
+		if (memcmp(&data[sizeof(CMD_GPO)-1+cnt], CMD_READ, sizeof(CMD_READ)-1) == 0) {
+			pinMask = app_test_GPO_CN50_read();
+			sprintf((char *)read_msg, "GPI read mask: %d", (int)pinMask);
+			_send_data(read_msg, sizeof(read_msg));
+			_send_new_line();
+			_send_header();
 			ret = true;
 		}
 	}
@@ -119,7 +158,9 @@ static bool _app_term_cmd (uint8_t * data) {
     else if ( memcmp(data, CMD_GPO, sizeof(CMD_GPO)-1) == 0  ) {
     	ret = _gpo_cmd(data);
     }
-
+    else if ( memcmp(data, CMD_GPI, sizeof(CMD_GPI)-1) == 0  ) {
+    	ret = _gpi_cmd(data);
+    }
 
 	if (!ret) {
 		if (data[0] != 0x00) {

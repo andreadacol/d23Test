@@ -152,6 +152,8 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  app_term_manager_state_machine();
+
+	  // review test manager
 	  app_test_GPO_CN49_square(0);
 	  app_test_GPO_CN50_square(0);
   }
