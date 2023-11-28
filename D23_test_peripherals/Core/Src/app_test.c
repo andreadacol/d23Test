@@ -248,6 +248,7 @@ uint8_t app_test_TIM_CN34_stop(void) {
 	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_4);
 
 	return ret;
+}
 
 uint8_t app_test_UART_CN28_test(uint32_t time) {
 
@@ -359,5 +360,4 @@ void app_test_manager_sm (void) {
 	if (_test.uart5_cn32) {
 		app_test_UART5_CN32_test(0);
 	}
-
 }

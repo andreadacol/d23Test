@@ -420,6 +420,9 @@ static bool _app_term_cmd (uint8_t * data) {
     else if ( memcmp(data, CMD_UART5_CN32, sizeof(CMD_UART5_CN32)-1) == 0  ) {
     	ret = _uart5_cn32_cmd(data);
     }
+    else if ( memcmp(data, CMD_TIM_CN34, sizeof(CMD_TIM_CN34)-1) == 0  ) {
+    	ret = _tim_cn34_cmd(data);
+    }
 
 	if (!ret) {
 		if (data[0] != 0x00) {
