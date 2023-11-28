@@ -28,6 +28,9 @@
 #define CMD_GPI_CN50_SQUARE	"gpi_square"
 #define CMD_UART_CN48		"serialCN48"
 #define CMD_TIM_CN34		"timerCN48"
+#define CMD_UART_CN28		"mdbCN28"
+#define CMD_UART1_CN32		"usart1CN32"
+#define CMD_UART5_CN32		"usart5CN32"
 
 #define CHAR_BACKSPACE  	0x08
 #define CHAR_RETURN			0x0D
@@ -36,21 +39,11 @@
 /**************************************************************************
  typedef
 **************************************************************************/
-typedef enum {
-	APP_TERM_COMMAND_NONE = 0x00,
-	APP_TERM_COMMAND_GPO_CN49,
-	APP_TERM_COMMAND_GPI_CN50,
-	APP_TERM_COMMAND_GPO_CN49_SQUARE,
-	APP_TERM_COMMAND_GPI_CN50_SQUARE,
-
-} app_term_command_enum_t;
-
 
 /**************************************************************************
  global vars
 **************************************************************************/
 extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart5;
 
 /**************************************************************************
  private functions - send functions
@@ -79,7 +72,10 @@ static void _usages_cmd (void) {
 	uint8_t cmd3[] = "	gpo_square	enable-disable square output at 1 Hz (gpo_square start stop)\r\n";
 	uint8_t cmd4[] = "	gpi_square	read current state of all input gpios at 1 Hz (gpi_square start stop) \r\n";
 	uint8_t cmd5[] = "	serialCN48	start stop  \r\n";
-	uint8_t cmd6[] = "	timerCN34	start stop  \r\n";
+	uint8_t cmd6[] = "	mdbCN28		start stop  \r\n";
+	uint8_t cmd7[] = "	usart1CN32	start stop  \r\n";
+	uint8_t cmd8[] = "	usart5CN32	start stop  \r\n";
+	uint8_t cmd9[] = "	timerCN34	start stop  \r\n";
 
 	_send_data(cmd0, sizeof(cmd0));
 	_send_data(cmd1, sizeof(cmd1));
@@ -88,7 +84,11 @@ static void _usages_cmd (void) {
 	_send_data(cmd4, sizeof(cmd4));
 	_send_data(cmd5, sizeof(cmd5));
 	_send_data(cmd6, sizeof(cmd6));
+	_send_data(cmd7, sizeof(cmd7));
+	_send_data(cmd8, sizeof(cmd8));
+	_send_data(cmd9, sizeof(cmd9));
 	_send_new_line();
+	_send_header();
 }
 
 static bool _gpo_cmd (uint8_t *data) {
@@ -237,13 +237,112 @@ static bool _uart_cn48_cmd (uint8_t *data) {
 	// check for commands:
 	if (cnt != 0) {
 		if (memcmp(&data[sizeof(CMD_UART_CN48)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
-			app_test_GPI_CN50_set(true);
+			app_test_UART_CN48_set(true);
 			_send_data(enable_msg, sizeof(enable_msg));
 			_send_header();
 			ret = true;
 		}
 		else if (memcmp(&data[sizeof(CMD_UART_CN48)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
-			app_test_GPI_CN50_set(false);
+			app_test_UART_CN48_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+static bool _uart_cn28_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "MDB CN28 test enabled \r\n";
+	uint8_t disable_msg[] = "MDB CN28  test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_UART_CN28)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_UART_CN28)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_UART_CN28_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_UART_CN28)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_UART_CN28_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+static bool _uart1_cn32_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "USART1 CN32 test enabled \r\n";
+	uint8_t disable_msg[] = "USART1 CN32  test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_UART1_CN32)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_UART1_CN32)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_UART1_CN32_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_UART1_CN32)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_UART1_CN32_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+static bool _uart5_cn32_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "USART5 CN32 test enabled \r\n";
+	uint8_t disable_msg[] = "USART5 CN32  test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_UART5_CN32)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_UART1_CN32)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_UART1_CN32_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_UART1_CN32)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_UART1_CN32_set(false);
 			_send_data(disable_msg, sizeof(disable_msg));
 			_send_header();
 			ret = true;
@@ -311,6 +410,15 @@ static bool _app_term_cmd (uint8_t * data) {
     }
     else if ( memcmp(data, CMD_UART_CN48, sizeof(CMD_UART_CN48)-1) == 0  ) {
     	ret = _uart_cn48_cmd(data);
+    }
+    else if ( memcmp(data, CMD_UART_CN28, sizeof(CMD_UART_CN28)-1) == 0  ) {
+    	ret = _uart_cn28_cmd(data);
+    }
+    else if ( memcmp(data, CMD_UART1_CN32, sizeof(CMD_UART1_CN32)-1) == 0  ) {
+    	ret = _uart1_cn32_cmd(data);
+    }
+    else if ( memcmp(data, CMD_UART5_CN32, sizeof(CMD_UART5_CN32)-1) == 0  ) {
+    	ret = _uart5_cn32_cmd(data);
     }
 
 	if (!ret) {

@@ -13,14 +13,18 @@
 /**************************************************************************
  global vars
 **************************************************************************/
+extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
+extern UART_HandleTypeDef huart5;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim4;
 
 app_test_typedef _test = {
 	.gpo_cn49_square = false,
 	.gpi_cn50_square = false,
-
+	.uart_cn48 = false,
+	.uart_cn28 = false,
 };
 /**************************************************************************
  functions
@@ -35,6 +39,18 @@ void app_test_GPI_CN50_set (bool var) {
 
 void app_test_UART_CN48_set (bool var) {
 	_test.uart_cn48 = var;
+}
+
+void app_test_UART_CN28_set (bool var) {
+	_test.uart_cn28 = var;
+}
+
+void app_test_UART1_CN32_set (bool var) {
+	_test.uart1_cn32 = var;
+}
+
+void app_test_UART5_CN32_set (bool var) {
+	_test.uart5_cn32 = var;
 }
 
 void app_test_GPO_CN49_start (void) {
@@ -192,7 +208,7 @@ uint8_t app_test_UART_CN48_test(uint32_t time) {
     if ((currentTime - lastExecutionTime) > time) {
 		lastExecutionTime = currentTime;
 
-		HAL_UART_Transmit(&huart3, test, sizeof(test), 0xFFFF );
+		HAL_UART_Transmit(&huart3, test, sizeof(test), 0xFF );
     }
     else {
     	if (HAL_UART_Receive(&huart3, &singleData, 1, 0xFF) == HAL_OK) {
@@ -232,6 +248,95 @@ uint8_t app_test_TIM_CN34_stop(void) {
 	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_4);
 
 	return ret;
+
+uint8_t app_test_UART_CN28_test(uint32_t time) {
+
+	uint8_t ret = 0;
+	uint8_t test[] = "Hello World!";
+	uint8_t singleData = 0;
+
+    if (time == 0) {
+        // Assign a default value if time is NULL
+        time = 500;
+    }
+
+    static uint32_t lastExecutionTime = 0;
+    uint32_t currentTime = HAL_GetTick();
+    if ((currentTime - lastExecutionTime) > time) {
+		lastExecutionTime = currentTime;
+
+		HAL_UART_Transmit(&huart2, test, sizeof(test), 0xFF );
+    }
+    else {
+    	if (HAL_UART_Receive(&huart2, &singleData, 1, 0xFF) == HAL_OK) {
+    		if (singleData != 0) {
+    			ret = 1;
+    			printf("%d\n", singleData);
+    		}
+    	}
+    }
+
+    return ret;
+}
+
+uint8_t app_test_UART1_CN32_test(uint32_t time) {
+
+	uint8_t ret = 0;
+	uint8_t test[] = "Hello World!";
+	uint8_t singleData = 0;
+
+    if (time == 0) {
+        // Assign a default value if time is NULL
+        time = 500;
+    }
+
+    static uint32_t lastExecutionTime = 0;
+    uint32_t currentTime = HAL_GetTick();
+    if ((currentTime - lastExecutionTime) > time) {
+		lastExecutionTime = currentTime;
+
+		HAL_UART_Transmit(&huart1, test, sizeof(test), 0xFF );
+    }
+    else {
+    	if (HAL_UART_Receive(&huart1, &singleData, 1, 0xFF) == HAL_OK) {
+    		if (singleData != 0) {
+    			ret = 1;
+    			printf("%d\n", singleData);
+    		}
+    	}
+    }
+
+    return ret;
+}
+
+uint8_t app_test_UART5_CN32_test(uint32_t time) {
+
+	uint8_t ret = 0;
+	uint8_t test[] = "Hello World!";
+	uint8_t singleData = 0;
+
+    if (time == 0) {
+        // Assign a default value if time is NULL
+        time = 500;
+    }
+
+    static uint32_t lastExecutionTime = 0;
+    uint32_t currentTime = HAL_GetTick();
+    if ((currentTime - lastExecutionTime) > time) {
+		lastExecutionTime = currentTime;
+
+		HAL_UART_Transmit(&huart5, test, sizeof(test), 0xFF );
+    }
+    else {
+    	if (HAL_UART_Receive(&huart5, &singleData, 1, 0xFF) == HAL_OK) {
+    		if (singleData != 0) {
+    			ret = 1;
+    			printf("%d\n", singleData);
+    		}
+    	}
+    }
+
+    return ret;
 }
 
 void app_test_manager_sm (void) {
@@ -244,6 +349,15 @@ void app_test_manager_sm (void) {
 	}
 	if (_test.uart_cn48) {
 		app_test_UART_CN48_test(0);
+	}
+	if (_test.uart_cn28) {
+		app_test_UART_CN28_test(0);
+	}
+	if (_test.uart1_cn32) {
+		app_test_UART1_CN32_test(0);
+	}
+	if (_test.uart5_cn32) {
+		app_test_UART5_CN32_test(0);
 	}
 
 }
