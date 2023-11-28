@@ -14,6 +14,8 @@
  global vars
 **************************************************************************/
 extern UART_HandleTypeDef huart3;
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim4;
 
 app_test_typedef _test = {
 	.gpo_cn49_square = false,
@@ -204,6 +206,33 @@ uint8_t app_test_UART_CN48_test(uint32_t time) {
     return ret;
 }
 
+uint8_t app_test_TIM_CN34_start(void) {
+	uint8_t ret = 0;
+
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+
+	return ret;
+}
+
+uint8_t app_test_TIM_CN34_stop(void) {
+	uint8_t ret = 0;
+
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_4);
+	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_4);
+
+	return ret;
+}
 
 void app_test_manager_sm (void) {
 

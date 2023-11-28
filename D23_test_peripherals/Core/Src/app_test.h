@@ -38,6 +38,8 @@ uint32_t 	app_test_GPI_CN50_read(void);
 void 		app_test_GPO_CN49_square(uint32_t time);
 uint8_t 	app_test_GPI_CN50_square(uint32_t time);
 uint8_t 	app_test_UART_CN48_test(uint32_t time);
+uint8_t		app_test_TIM_CN34_start(void);
+uint8_t		app_test_TIM_CN34_stop(void);
 
 void 		app_test_manager_sm (void);
 
