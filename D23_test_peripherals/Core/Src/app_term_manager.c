@@ -31,6 +31,10 @@
 #define CMD_UART_CN28		"mdbCN28"
 #define CMD_UART1_CN32		"usart1CN32"
 #define CMD_UART5_CN32		"usart5CN32"
+#define CMD_SPI_PX30		"spi_px30"
+#define CMD_SPI_CN39		"spi_cn39"
+#define CMD_I2C1_CN33		"i2c1_cn33"
+#define CMD_I2C2_CN33		"i2c2_cn33"
 
 #define CHAR_BACKSPACE  	0x08
 #define CHAR_RETURN			0x0D
@@ -66,27 +70,35 @@ static void _send_data (uint8_t * data, uint16_t size ) {
 **************************************************************************/
 static void _usages_cmd (void) {
 
-	uint8_t cmd0[] = "Commands: \r\n";
-	uint8_t cmd1[] = "	gpo			enable-disable all output gpios (gpo start stop) \r\n";
-	uint8_t cmd2[] = "	gpi			read current state of all input gpios \r\n";
-	uint8_t cmd3[] = "	gpo_square	enable-disable square output at 1 Hz (gpo_square start stop)\r\n";
-	uint8_t cmd4[] = "	gpi_square	read current state of all input gpios at 1 Hz (gpi_square start stop) \r\n";
-	uint8_t cmd5[] = "	serialCN48	start stop  \r\n";
-	uint8_t cmd6[] = "	mdbCN28		start stop  \r\n";
-	uint8_t cmd7[] = "	usart1CN32	start stop  \r\n";
-	uint8_t cmd8[] = "	usart5CN32	start stop  \r\n";
-	uint8_t cmd9[] = "	timerCN34	start stop  \r\n";
+	uint8_t cmd0[] 	= "Commands: \r\n";
+	uint8_t cmd1[] 	= "	gpo		enable-disable all output gpios (gpo start stop) \r\n";
+	uint8_t cmd2[] 	= "	gpi		read current state of all input gpios \r\n";
+	uint8_t cmd3[] 	= "	gpo_square	enable-disable square output at 1 Hz (gpo_square start stop)\r\n";
+	uint8_t cmd4[] 	= "	gpi_square	read current state of all input gpios at 1 Hz (gpi_square start stop) \r\n";
+	uint8_t cmd5[] 	= "	serialCN48	start stop  \r\n";
+	uint8_t cmd6[] 	= "	mdbCN28		start stop  \r\n";
+	uint8_t cmd7[] 	= "	usart1CN32	start stop  \r\n";
+	uint8_t cmd8[] 	= "	usart5CN32	start stop  \r\n";
+	uint8_t cmd9[] 	= "	timerCN34	start stop  \r\n";
+	uint8_t cmd10[] = "	spi_px30	start stop  \r\n";
+	uint8_t cmd11[] = "	spi_cn39	start stop  \r\n";
+	uint8_t cmd12[] = "	i2c1_cn33	start stop  \r\n";
+	uint8_t cmd13[] = "	i2c2_cn33	start stop  \r\n";
 
-	_send_data(cmd0, sizeof(cmd0));
-	_send_data(cmd1, sizeof(cmd1));
-	_send_data(cmd2, sizeof(cmd2));
-	_send_data(cmd3, sizeof(cmd3));
-	_send_data(cmd4, sizeof(cmd4));
-	_send_data(cmd5, sizeof(cmd5));
-	_send_data(cmd6, sizeof(cmd6));
-	_send_data(cmd7, sizeof(cmd7));
-	_send_data(cmd8, sizeof(cmd8));
-	_send_data(cmd9, sizeof(cmd9));
+	_send_data(cmd0,  sizeof(cmd0));
+	_send_data(cmd1,  sizeof(cmd1));
+	_send_data(cmd2,  sizeof(cmd2));
+	_send_data(cmd3,  sizeof(cmd3));
+	_send_data(cmd4,  sizeof(cmd4));
+	_send_data(cmd5,  sizeof(cmd5));
+	_send_data(cmd6,  sizeof(cmd6));
+	_send_data(cmd7,  sizeof(cmd7));
+	_send_data(cmd8,  sizeof(cmd8));
+	_send_data(cmd9,  sizeof(cmd9));
+	_send_data(cmd10, sizeof(cmd10));
+	_send_data(cmd11, sizeof(cmd11));
+	_send_data(cmd12, sizeof(cmd12));
+	_send_data(cmd13, sizeof(cmd13));
 	_send_new_line();
 	_send_header();
 }
@@ -336,13 +348,13 @@ static bool _uart5_cn32_cmd (uint8_t *data) {
 	// check for commands:
 	if (cnt != 0) {
 		if (memcmp(&data[sizeof(CMD_UART1_CN32)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
-			app_test_UART1_CN32_set(true);
+			app_test_UART5_CN32_set(true);
 			_send_data(enable_msg, sizeof(enable_msg));
 			_send_header();
 			ret = true;
 		}
 		else if (memcmp(&data[sizeof(CMD_UART1_CN32)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
-			app_test_UART1_CN32_set(false);
+			app_test_UART5_CN32_set(false);
 			_send_data(disable_msg, sizeof(disable_msg));
 			_send_header();
 			ret = true;
@@ -374,8 +386,140 @@ static bool _tim_cn34_cmd (uint8_t *data) {
 			_send_header();
 			ret = true;
 		}
-		else if (memcmp(&data[sizeof(CMD_UART_CN48)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+		else if (memcmp(&data[sizeof(CMD_TIM_CN34)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
 			app_test_GPI_CN50_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+static bool _spi_px30_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "SPI PX30 test enabled \r\n";
+	uint8_t disable_msg[] = "SPI PX30  test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_SPI_PX30)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_SPI_PX30)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_SPI_PX30_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_SPI_PX30)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_SPI_PX30_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+static bool _spi_cn39_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "SPI CN39 test enabled \r\n";
+	uint8_t disable_msg[] = "SPI CN39  test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_SPI_CN39)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_SPI_CN39)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_SPI_CN39_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_SPI_CN39)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_SPI_CN39_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+static bool _i2c1_cn33_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "I2C1 CN33 test enabled \r\n";
+	uint8_t disable_msg[] = "I2C1 CN33  test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_I2C1_CN33)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_I2C1_CN33)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_I2C1_CN33_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_I2C1_CN33)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_I2C1_CN33_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+static bool _i2c2_cn33_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "I2C2 CN33 test enabled \r\n";
+	uint8_t disable_msg[] = "I2C2 CN33  test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_I2C2_CN33)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_I2C2_CN33)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_I2C2_CN33_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_I2C2_CN33)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_I2C2_CN33_set(false);
 			_send_data(disable_msg, sizeof(disable_msg));
 			_send_header();
 			ret = true;
@@ -423,6 +567,18 @@ static bool _app_term_cmd (uint8_t * data) {
     else if ( memcmp(data, CMD_TIM_CN34, sizeof(CMD_TIM_CN34)-1) == 0  ) {
     	ret = _tim_cn34_cmd(data);
     }
+    else if ( memcmp(data, CMD_SPI_PX30, sizeof(CMD_SPI_PX30)-1) == 0  ) {
+    	ret = _spi_px30_cmd(data);
+    }
+    else if ( memcmp(data, CMD_SPI_CN39, sizeof(CMD_SPI_CN39)-1) == 0  ) {
+    	ret = _spi_cn39_cmd(data);
+    }
+    else if ( memcmp(data, CMD_I2C1_CN33, sizeof(CMD_I2C1_CN33)-1) == 0  ) {
+    	ret = _i2c1_cn33_cmd(data);
+    }
+    else if ( memcmp(data, CMD_I2C2_CN33, sizeof(CMD_I2C2_CN33)-1) == 0  ) {
+    	ret = _i2c2_cn33_cmd(data);
+    }
 
 	if (!ret) {
 		if (data[0] != 0x00) {
@@ -459,7 +615,7 @@ void app_term_manager_sm (void) {
 	}
 
 	// checking received data from terminal
-	HAL_UART_Receive(&huart1, &singleData, 1, 0xFF);
+	HAL_UART_Receive(&huart1, &singleData, 1, 1);
 
 	// backspace command received
 	if ((singleData == CHAR_BACKSPACE) && (pos != 0)) {

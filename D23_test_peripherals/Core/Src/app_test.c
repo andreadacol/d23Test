@@ -17,14 +17,27 @@ extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart5;
-extern TIM_HandleTypeDef htim1;
-extern TIM_HandleTypeDef htim4;
+
+extern TIM_HandleTypeDef  htim1;
+extern TIM_HandleTypeDef  htim4;
+
+extern SPI_HandleTypeDef  hspi1;
+extern SPI_HandleTypeDef  hspi2;
+
+extern I2C_HandleTypeDef  hi2c1;
+extern I2C_HandleTypeDef  hi2c2;
 
 app_test_typedef _test = {
-	.gpo_cn49_square = false,
-	.gpi_cn50_square = false,
-	.uart_cn48 = false,
-	.uart_cn28 = false,
+	.gpo_cn49_square 	= false,
+	.gpi_cn50_square 	= false,
+	.uart_cn48 			= false,
+	.uart_cn28 			= false,
+	.uart1_cn32 		= false,
+	.uart5_cn32 		= false,
+	.spi_px30 			= false,
+	.spi_cn39 			= false,
+	.i2c1_cn33 			= false,
+	.i2c2_cn33 			= false,
 };
 /**************************************************************************
  functions
@@ -52,6 +65,23 @@ void app_test_UART1_CN32_set (bool var) {
 void app_test_UART5_CN32_set (bool var) {
 	_test.uart5_cn32 = var;
 }
+
+void app_test_SPI_PX30_set (bool var) {
+	_test.spi_px30 = var;
+}
+
+void app_test_SPI_CN39_set (bool var) {
+	_test.spi_cn39 = var;
+}
+
+void app_test_I2C1_CN33_set (bool var) {
+	_test.i2c1_cn33 = var;
+}
+
+void app_test_I2C2_CN33_set (bool var) {
+	_test.i2c2_cn33 = var;
+}
+
 
 void app_test_GPO_CN49_start (void) {
 
@@ -195,7 +225,7 @@ uint8_t app_test_GPI_CN50_square(uint32_t time) {
 uint8_t app_test_UART_CN48_test(uint32_t time) {
 
 	uint8_t ret = 0;
-	uint8_t test[] = "Hello World!";
+	uint8_t test[] = "Hello World!\r\n";
 	uint8_t singleData = 0;
 
     if (time == 0) {
@@ -211,7 +241,7 @@ uint8_t app_test_UART_CN48_test(uint32_t time) {
 		HAL_UART_Transmit(&huart3, test, sizeof(test), 0xFF );
     }
     else {
-    	if (HAL_UART_Receive(&huart3, &singleData, 1, 0xFF) == HAL_OK) {
+    	if (HAL_UART_Receive(&huart3, &singleData, 1, 1) == HAL_OK) {
     		if (singleData != 0) {
     			ret = 1;
     			printf("%d\n", singleData);
@@ -283,7 +313,7 @@ uint8_t app_test_UART_CN28_test(uint32_t time) {
 uint8_t app_test_UART1_CN32_test(uint32_t time) {
 
 	uint8_t ret = 0;
-	uint8_t test[] = "Hello World!";
+	uint8_t test[] = "Hello World!\r\n";
 	uint8_t singleData = 0;
 
     if (time == 0) {
@@ -313,7 +343,7 @@ uint8_t app_test_UART1_CN32_test(uint32_t time) {
 uint8_t app_test_UART5_CN32_test(uint32_t time) {
 
 	uint8_t ret = 0;
-	uint8_t test[] = "Hello World!";
+	uint8_t test[] = "Hello World!\r\n";
 	uint8_t singleData = 0;
 
     if (time == 0) {
@@ -340,6 +370,161 @@ uint8_t app_test_UART5_CN32_test(uint32_t time) {
     return ret;
 }
 
+uint8_t app_test_SPI_PX30_echo (void) {
+
+	uint8_t ret = 0;
+
+	uint8_t dataRcv[16] = {0};
+
+	if ( HAL_SPI_Receive(&hspi1, dataRcv, sizeof(dataRcv), 1000) == HAL_OK ) {
+		HAL_UART_Transmit(&huart1, (uint8_t*)"spi receive\r\n", 13, 0xFFFF);
+
+		HAL_SPI_Transmit(&hspi1, dataRcv, sizeof(dataRcv), 1000);
+	}
+
+    return ret;
+}
+
+uint8_t app_test_SPI_CN39_echo (void) {
+
+	uint8_t ret = 0;
+
+	uint8_t dataRcv[16] = {0};
+	uint8_t dataTrn[16];
+
+	for (uint8_t ind = 0; ind < 16; ind++) {
+		dataTrn[ind] = ind;
+	}
+
+//	HAL_UART_Transmit(&huart1, (uint8_t*)"spi receive\r\n", 13, 0xFFFF);
+
+	if(HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)dataTrn, (uint8_t *)dataRcv, 16, 5000) == HAL_OK) {
+
+		if (memcmp(dataTrn, dataRcv, 16) == 0) {
+			HAL_UART_Transmit(&huart1, (uint8_t*)"spi receive\r\n", 13, 0xFFFF);
+		}
+
+	}
+
+	HAL_Delay(100);
+
+    return ret;
+}
+
+uint8_t app_test_I2C1_CN33_echo (void) {
+
+	uint8_t ret = 0;
+
+	uint8_t dataRcv[16] = {0};
+	uint8_t dataTrn[16];
+
+	for (uint8_t ind = 0; ind < 16; ind++) {
+		dataTrn[ind] = ind;
+	}
+
+
+	/*##-2- Start the transmission process #####################################*/
+	/* While the I2C in reception process, user can transmit data through
+	 "aTxBuffer" buffer */
+	/* Timeout is set to 10S */
+	while(HAL_I2C_Master_Transmit(&hi2c1, (uint16_t)I2C_ADDRESS, (uint8_t*)dataTrn, 16, 1000)!= HAL_OK)
+	{
+		/* Error_Handler() function is called when Timeout error occurs.
+		   When Acknowledge failure occurs (Slave don't acknowledge its address)
+		   Master restarts communication */
+		if (HAL_I2C_GetError(&hi2c1) != HAL_I2C_ERROR_AF)
+		{
+//			Error_Handler();
+		}
+	}
+
+	  /*##-3- Put I2C peripheral in reception process ############################*/
+	  /* Timeout is set to 10S */
+	  while(HAL_I2C_Master_Receive(&hi2c1, (uint16_t)I2C_ADDRESS, (uint8_t *)dataRcv, 16, 10000) != HAL_OK)
+	  {
+	    /* Error_Handler() function is called when Timeout error occurs.
+	       When Acknowledge failure occurs (Slave don't acknowledge it's address)
+	       Master restarts communication */
+	    if (HAL_I2C_GetError(&hi2c1) != HAL_I2C_ERROR_AF)
+	    {
+//	      Error_Handler();
+	    }
+	  }
+
+
+//	/*##-2- Put I2C peripheral in reception process ############################*/
+//	  /* Timeout is set to 10S  */
+//	  if(HAL_I2C_Slave_Receive(&hi2c1, (uint8_t *)dataRcv, 16, 10000) != HAL_OK)
+//	  {
+//	    /* Transfer error in reception process */
+////	    Error_Handler();
+//	  }
+//	  else {
+//		  /*##-3- Start the transmission process #####################################*/
+//		  /* While the I2C is in reception process, user can transmit data through
+//		     "aTxBuffer" buffer */
+//		  /* Timeout is set to 10S */
+//		  if(HAL_I2C_Slave_Transmit(&hi2c1, (uint8_t*)dataRcv, 16, 10000)!= HAL_OK)
+//		  {
+//		    /* Transfer error in transmission process */
+//	//	    Error_Handler();
+//		  }
+//	  }
+
+
+
+	HAL_Delay(10);
+
+    return ret;
+}
+
+uint8_t app_test_I2C2_CN33_echo (void) {
+
+	uint8_t ret = 0;
+
+	uint8_t dataRcv[16] = {0};
+	uint8_t dataTrn[16];
+
+	for (uint8_t ind = 0; ind < 16; ind++) {
+		dataTrn[ind] = ind;
+	}
+
+
+	/*##-2- Start the transmission process #####################################*/
+	/* While the I2C in reception process, user can transmit data through
+	 "aTxBuffer" buffer */
+	/* Timeout is set to 10S */
+	while(HAL_I2C_Master_Transmit(&hi2c2, (uint16_t)I2C_ADDRESS, (uint8_t*)dataTrn, 16, 10)!= HAL_OK)
+	{
+		/* Error_Handler() function is called when Timeout error occurs.
+		   When Acknowledge failure occurs (Slave don't acknowledge its address)
+		   Master restarts communication */
+		if (HAL_I2C_GetError(&hi2c2) != HAL_I2C_ERROR_AF)
+		{
+//			Error_Handler();
+		}
+	}
+
+	  /*##-3- Put I2C peripheral in reception process ############################*/
+	  /* Timeout is set to 10S */
+	  while(HAL_I2C_Master_Receive(&hi2c2, (uint16_t)I2C_ADDRESS, (uint8_t *)dataRcv, 16, 10000) != HAL_OK)
+	  {
+	    /* Error_Handler() function is called when Timeout error occurs.
+	       When Acknowledge failure occurs (Slave don't acknowledge it's address)
+	       Master restarts communication */
+	    if (HAL_I2C_GetError(&hi2c2) != HAL_I2C_ERROR_AF)
+	    {
+//	      Error_Handler();
+	    }
+	  }
+
+	HAL_Delay(10);
+
+    return ret;
+}
+
+
+
 void app_test_manager_sm (void) {
 
 	if (_test.gpo_cn49_square) {
@@ -360,4 +545,25 @@ void app_test_manager_sm (void) {
 	if (_test.uart5_cn32) {
 		app_test_UART5_CN32_test(0);
 	}
+	if (_test.spi_px30) {
+		app_test_SPI_PX30_echo();
+	}
+	if (_test.spi_px30) {
+		app_test_SPI_PX30_echo();
+	}
+	if (_test.spi_cn39) {
+		app_test_SPI_CN39_echo();
+	}
+	if (_test.i2c1_cn33) {
+		app_test_I2C1_CN33_echo();
+	}
+	if (_test.i2c2_cn33) {
+		app_test_I2C2_CN33_echo();
+	}
+
+//	HAL_UART_Transmit(&huart1, (uint8_t*)"_test variable", 14, 0xFFFF);
+//	uint8_t print[10] = {0};
+//	sprintf(print, "%d \r\n", (int)_test.spi_px30);
+//	HAL_UART_Transmit(&huart1, print, 14, 0xFFFF);
+
 }
