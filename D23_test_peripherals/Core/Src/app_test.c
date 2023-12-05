@@ -523,7 +523,21 @@ uint8_t app_test_I2C2_CN33_echo (void) {
     return ret;
 }
 
+uint8_t app_test_USB_CN31_start(void) {
+	uint8_t ret = 0;
 
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11 | GPIO_PIN_12, GPIO_PIN_SET);
+
+	return ret;
+}
+
+uint8_t app_test_USB_CN31_stop(void) {
+	uint8_t ret = 0;
+
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11 | GPIO_PIN_12, GPIO_PIN_RESET);
+
+	return ret;
+}
 
 void app_test_manager_sm (void) {
 

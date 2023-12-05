@@ -35,6 +35,7 @@
 #define CMD_SPI_CN39		"spi_cn39"
 #define CMD_I2C1_CN33		"i2c1_cn33"
 #define CMD_I2C2_CN33		"i2c2_cn33"
+#define CMD_USB_CN31		"usb_cn31"
 
 #define CHAR_BACKSPACE  	0x08
 #define CHAR_RETURN			0x0D
@@ -529,6 +530,39 @@ static bool _i2c2_cn33_cmd (uint8_t *data) {
 	return ret;
 }
 
+static bool _usb_cn31_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "USB CN31 test enabled \r\n";
+	uint8_t disable_msg[] = "USB CN31  test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_USB_CN31)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_USB_CN31)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_USB_CN31_start();
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_USB_CN31)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_USB_CN31_stop();
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
 /**************************************************************************
  private functions - command manager
 **************************************************************************/
@@ -579,7 +613,10 @@ static bool _app_term_cmd (uint8_t * data) {
     else if ( memcmp(data, CMD_I2C2_CN33, sizeof(CMD_I2C2_CN33)-1) == 0  ) {
     	ret = _i2c2_cn33_cmd(data);
     }
-
+    else if ( memcmp(data, CMD_USB_CN31, sizeof(CMD_USB_CN31)-1) == 0  ) {
+    	ret = _usb_cn31_cmd(data);
+    }
+	
 	if (!ret) {
 		if (data[0] != 0x00) {
 			_send_data((uint8_t*)"Unknown command! \r\n", 17);
@@ -648,5 +685,4 @@ void app_term_manager_sm (void) {
 		}
 
 	}
-
 }

@@ -66,6 +66,8 @@ uint8_t 	app_test_SPI_PX30_echo (void);
 uint8_t 	app_test_SPI_CN39_echo (void);
 uint8_t 	app_test_I2C1_CN33_echo (void);
 uint8_t 	app_test_I2C2_CN33_echo (void);
+uint8_t 	app_test_USB_CN31_start(void);
+uint8_t 	app_test_USB_CN31_stop(void);
 
 void 		app_test_manager_sm (void);
 
