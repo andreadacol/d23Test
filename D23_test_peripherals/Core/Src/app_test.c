@@ -397,14 +397,51 @@ uint8_t app_test_SPI_CN39_echo (void) {
 	}
 
 //	HAL_UART_Transmit(&huart1, (uint8_t*)"spi receive\r\n", 13, 0xFFFF);
+//
+//	if(HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)dataTrn, (uint8_t *)dataRcv, 16, 5000) == HAL_OK) {
+//
+//		if (memcmp(dataTrn, dataRcv, 16) == 0) {
+////			HAL_UART_Transmit(&huart1, (uint8_t*)"spi receive\r\n", 13, 0xFFFF);
+//		}
+//
+//	}
+	/* USER CODE BEGIN PV */
+	/* Buffer used for transmission */
+	uint8_t aTxBuffer[] = "ciao";
 
-	if(HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)dataTrn, (uint8_t *)dataRcv, 16, 5000) == HAL_OK) {
+	uint8_t BUFFERSIZE = sizeof(aTxBuffer)-1;
 
-		if (memcmp(dataTrn, dataRcv, 16) == 0) {
-			HAL_UART_Transmit(&huart1, (uint8_t*)"spi receive\r\n", 13, 0xFFFF);
-		}
+	/* Buffer used for reception */
+	uint8_t aRxBuffer[BUFFERSIZE];
 
-	}
+	for(uint8_t ind =0; ind< sizeof(aRxBuffer); ind ++)
+		aRxBuffer[ind] = ind;
+
+	 switch (HAL_SPI_TransmitReceive(&hspi1, (uint8_t *)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE, 30000))
+	  {
+	    case HAL_OK:
+	      /* Communication is completed ___________________________________________ */
+	      /* Compare the sent and received buffers */
+	      if (memcmp((uint8_t *)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE))
+	      {
+	        /* Transfer error in transmission process */
+	    	  dataRcv[0] = 0;
+	      }
+	      /* Turn LED1 on: Transfer in transmission process is correct */
+	      break;
+
+	    case HAL_TIMEOUT:
+	      /* A Timeout Occur ______________________________________________________*/
+	      /* Call Timeout Handler */
+	      break;
+	    /* An Error Occur ______________________________________________________ */
+	    case HAL_ERROR:
+	      /* Call Timeout Handler */
+	      break;
+	    default:
+	      break;
+	  }
+
 
 	HAL_Delay(100);
 
@@ -540,6 +577,8 @@ uint8_t app_test_USB_CN31_stop(void) {
 }
 
 void app_test_manager_sm (void) {
+
+	_test.spi_cn39 = true;
 
 	if (_test.gpo_cn49_square) {
 		app_test_GPO_CN49_square(0);

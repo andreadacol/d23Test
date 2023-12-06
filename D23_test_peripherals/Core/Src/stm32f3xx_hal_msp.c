@@ -599,11 +599,13 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     __HAL_RCC_GPIOD_CLK_ENABLE();
     /**USART2 GPIO Configuration
     PD3     ------> USART2_CTS
+    PD4     ------> USART2_RTS
     PD5     ------> USART2_TX
     PD6     ------> USART2_RX
     PD7     ------> USART2_CK
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
+    GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6
+                          |GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -625,11 +627,13 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     __HAL_RCC_GPIOD_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
     /**USART3 GPIO Configuration
+    PD10     ------> USART3_CK
+    PD11     ------> USART3_CTS
     PD12     ------> USART3_DE
     PC10     ------> USART3_TX
     PC11     ------> USART3_RX
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_12;
+    GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -706,11 +710,13 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
 
     /**USART2 GPIO Configuration
     PD3     ------> USART2_CTS
+    PD4     ------> USART2_RTS
     PD5     ------> USART2_TX
     PD6     ------> USART2_RX
     PD7     ------> USART2_CK
     */
-    HAL_GPIO_DeInit(GPIOD, GPIO_PIN_3|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
+    HAL_GPIO_DeInit(GPIOD, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6
+                          |GPIO_PIN_7);
 
   /* USER CODE BEGIN USART2_MspDeInit 1 */
 
@@ -725,11 +731,13 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     __HAL_RCC_USART3_CLK_DISABLE();
 
     /**USART3 GPIO Configuration
+    PD10     ------> USART3_CK
+    PD11     ------> USART3_CTS
     PD12     ------> USART3_DE
     PC10     ------> USART3_TX
     PC11     ------> USART3_RX
     */
-    HAL_GPIO_DeInit(GPIOD, GPIO_PIN_12);
+    HAL_GPIO_DeInit(GPIOD, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12);
 
     HAL_GPIO_DeInit(GPIOC, GPIO_PIN_10|GPIO_PIN_11);
 
