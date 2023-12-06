@@ -35,6 +35,7 @@ typedef struct {
 	bool spi_cn39;
 	bool i2c1_cn33;
 	bool i2c2_cn33;
+	bool can_cn30;
 } app_test_typedef;
 
 /**************************************************************************
@@ -50,6 +51,7 @@ void 		app_test_SPI_PX30_set (bool var);
 void 		app_test_SPI_CN39_set (bool var);
 void 		app_test_I2C1_CN33_set (bool var);
 void 		app_test_I2C2_CN33_set (bool var);
+void 		app_test_CAN_CN30_set (bool var);
 
 void 		app_test_GPO_CN49_start (void);
 void 		app_test_GPO_CN49_stop (void);
@@ -68,6 +70,7 @@ uint8_t 	app_test_I2C1_CN33_echo (void);
 uint8_t 	app_test_I2C2_CN33_echo (void);
 uint8_t 	app_test_USB_CN31_start(void);
 uint8_t 	app_test_USB_CN31_stop(void);
+uint8_t		app_test_CAN_CN30_echo(void);
 
 void 		app_test_manager_sm (void);
 

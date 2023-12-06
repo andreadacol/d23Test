@@ -36,6 +36,7 @@
 #define CMD_I2C1_CN33		"i2c1_cn33"
 #define CMD_I2C2_CN33		"i2c2_cn33"
 #define CMD_USB_CN31		"usb_cn31"
+#define CMD_CAN_CN30		"can_cn30"
 
 #define CHAR_BACKSPACE  	0x08
 #define CHAR_RETURN			0x0D
@@ -85,6 +86,7 @@ static void _usages_cmd (void) {
 	uint8_t cmd11[] = "	spi_cn39	start stop  \r\n";
 	uint8_t cmd12[] = "	i2c1_cn33	start stop  \r\n";
 	uint8_t cmd13[] = "	i2c2_cn33	start stop  \r\n";
+	uint8_t cmd14[] = "	can_cn30	start stop  \r\n";
 
 	_send_data(cmd0,  sizeof(cmd0));
 	_send_data(cmd1,  sizeof(cmd1));
@@ -100,6 +102,7 @@ static void _usages_cmd (void) {
 	_send_data(cmd11, sizeof(cmd11));
 	_send_data(cmd12, sizeof(cmd12));
 	_send_data(cmd13, sizeof(cmd13));
+	_send_data(cmd14, sizeof(cmd14));
 	_send_new_line();
 	_send_header();
 }
@@ -563,6 +566,39 @@ static bool _usb_cn31_cmd (uint8_t *data) {
 	return ret;
 }
 
+static bool _can_cn30_cmd (uint8_t *data) {
+	bool ret = false;
+	uint8_t cnt = 0;
+
+	uint8_t enable_msg[] = "CAN CN30 test enabled \r\n";
+	uint8_t disable_msg[] = "CAN CN30  test disabled \r\n";
+
+	do {
+		if ( data[sizeof(CMD_CAN_CN30)-1+cnt] != CHAR_SPACE ) {
+			break;
+		}
+		cnt++;
+	} while (cnt < 30);
+
+	// check for commands:
+	if (cnt != 0) {
+		if (memcmp(&data[sizeof(CMD_CAN_CN30)-1+cnt], CMD_START, sizeof(CMD_START)-1) == 0) {
+			app_test_CAN_CN30_set(true);
+			_send_data(enable_msg, sizeof(enable_msg));
+			_send_header();
+			ret = true;
+		}
+		else if (memcmp(&data[sizeof(CMD_CAN_CN30)-1+cnt], CMD_STOP, sizeof(CMD_STOP)-1) == 0) {
+			app_test_CAN_CN30_set(false);
+			_send_data(disable_msg, sizeof(disable_msg));
+			_send_header();
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
 /**************************************************************************
  private functions - command manager
 **************************************************************************/
@@ -615,6 +651,9 @@ static bool _app_term_cmd (uint8_t * data) {
     }
     else if ( memcmp(data, CMD_USB_CN31, sizeof(CMD_USB_CN31)-1) == 0  ) {
     	ret = _usb_cn31_cmd(data);
+    }
+    else if ( memcmp(data, CMD_CAN_CN30, sizeof(CMD_CAN_CN30)-1) == 0  ) {
+    	ret = _can_cn30_cmd(data);
     }
 	
 	if (!ret) {

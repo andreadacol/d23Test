@@ -27,6 +27,8 @@ extern SPI_HandleTypeDef  hspi2;
 extern I2C_HandleTypeDef  hi2c1;
 extern I2C_HandleTypeDef  hi2c2;
 
+extern I2C_HandleTypeDef  hcan;
+
 app_test_typedef _test = {
 	.gpo_cn49_square 	= false,
 	.gpi_cn50_square 	= false,
@@ -82,6 +84,9 @@ void app_test_I2C2_CN33_set (bool var) {
 	_test.i2c2_cn33 = var;
 }
 
+void app_test_CAN_CN30_set (bool var) {
+	_test.i2c2_cn33 = var;
+}
 
 void app_test_GPO_CN49_start (void) {
 
@@ -560,6 +565,30 @@ uint8_t app_test_I2C2_CN33_echo (void) {
     return ret;
 }
 
+uint8_t app_test_CAN_CN30_echo (void) {
+
+	uint8_t ret = 0;
+
+    CAN_TxHeaderTypeDef txHeader;
+    uint8_t txData[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+
+    // Set up CAN header
+    txHeader.StdId = 0x123;         // Standard CAN ID (adjust as needed)
+    txHeader.ExtId = 0x00;          // Extended CAN ID (not used in this example)
+    txHeader.IDE = CAN_ID_STD;      // Standard CAN ID
+    txHeader.RTR = CAN_RTR_DATA;    // Data frame, not a remote transmission request
+    txHeader.DLC = sizeof(txData);  // Number of bytes in the data
+
+    // Transmit the CAN message
+    if (HAL_CAN_AddTxMessage(&hcan, &txHeader, txData, NULL) != HAL_OK) {
+        Error_Handler();
+    }
+
+	HAL_Delay(10);
+
+    return ret;
+}
+
 uint8_t app_test_USB_CN31_start(void) {
 	uint8_t ret = 0;
 
@@ -612,6 +641,9 @@ void app_test_manager_sm (void) {
 	}
 	if (_test.i2c2_cn33) {
 		app_test_I2C2_CN33_echo();
+	}
+	if (_test.can_cn30) {
+		app_test_CAN_CN30_echo();
 	}
 
 //	HAL_UART_Transmit(&huart1, (uint8_t*)"_test variable", 14, 0xFFFF);
