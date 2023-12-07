@@ -81,20 +81,6 @@ static void MX_TIM4_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-CAN_HandleTypeDef hcan;
-
-I2C_HandleTypeDef hi2c1;
-I2C_HandleTypeDef hi2c2;
-
-SPI_HandleTypeDef hspi2;
-
-TIM_HandleTypeDef htim1;
-
-UART_HandleTypeDef huart5;
-UART_HandleTypeDef huart1;
-UART_HandleTypeDef huart2;
-UART_HandleTypeDef huart3;
-
 /* USER CODE END 0 */
 
 /**

@@ -571,6 +571,7 @@ uint8_t app_test_CAN_CN30_echo (void) {
 
     CAN_TxHeaderTypeDef txHeader;
     uint8_t txData[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    uint32_t TxMailbox;
 
     // Set up CAN header
     txHeader.StdId = 0x123;         // Standard CAN ID (adjust as needed)
@@ -580,7 +581,7 @@ uint8_t app_test_CAN_CN30_echo (void) {
     txHeader.DLC = sizeof(txData);  // Number of bytes in the data
 
     // Transmit the CAN message
-    if (HAL_CAN_AddTxMessage(&hcan, &txHeader, txData, NULL) != HAL_OK) {
+    if (HAL_CAN_AddTxMessage(&hcan, &txHeader, txData, &TxMailbox) != HAL_OK) {
         Error_Handler();
     }
 
