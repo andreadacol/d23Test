@@ -27,7 +27,7 @@ extern SPI_HandleTypeDef  hspi2;
 extern I2C_HandleTypeDef  hi2c1;
 extern I2C_HandleTypeDef  hi2c2;
 
-extern I2C_HandleTypeDef  hcan;
+extern CAN_HandleTypeDef  hcan;
 
 app_test_typedef _test = {
 	.gpo_cn49_square 	= false,
@@ -85,7 +85,7 @@ void app_test_I2C2_CN33_set (bool var) {
 }
 
 void app_test_CAN_CN30_set (bool var) {
-	_test.i2c2_cn33 = var;
+	_test.can_cn30 = var;
 }
 
 void app_test_GPO_CN49_start (void) {
@@ -379,45 +379,14 @@ uint8_t app_test_SPI_PX30_echo (void) {
 
 	uint8_t ret = 0;
 
-	uint8_t dataRcv[16] = {0};
-
-	if ( HAL_SPI_Receive(&hspi1, dataRcv, sizeof(dataRcv), 1000) == HAL_OK ) {
-		HAL_UART_Transmit(&huart1, (uint8_t*)"spi receive\r\n", 13, 0xFFFF);
-
-		HAL_SPI_Transmit(&hspi1, dataRcv, sizeof(dataRcv), 1000);
-	}
-
-    return ret;
-}
-
-uint8_t app_test_SPI_CN39_echo (void) {
-
-	uint8_t ret = 0;
-
-	uint8_t dataRcv[16] = {0};
-	uint8_t dataTrn[16];
-
-	for (uint8_t ind = 0; ind < 16; ind++) {
-		dataTrn[ind] = ind;
-	}
-
-//	HAL_UART_Transmit(&huart1, (uint8_t*)"spi receive\r\n", 13, 0xFFFF);
-//
-//	if(HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)dataTrn, (uint8_t *)dataRcv, 16, 5000) == HAL_OK) {
-//
-//		if (memcmp(dataTrn, dataRcv, 16) == 0) {
-////			HAL_UART_Transmit(&huart1, (uint8_t*)"spi receive\r\n", 13, 0xFFFF);
-//		}
-//
-//	}
-	/* USER CODE BEGIN PV */
 	/* Buffer used for transmission */
-	uint8_t aTxBuffer[] = "ciao";
+	uint8_t aTxBuffer[] = "ciao\r\n";
 
 	uint8_t BUFFERSIZE = sizeof(aTxBuffer)-1;
 
 	/* Buffer used for reception */
 	uint8_t aRxBuffer[BUFFERSIZE];
+
 
 	for(uint8_t ind =0; ind< sizeof(aRxBuffer); ind ++)
 		aRxBuffer[ind] = ind;
@@ -427,10 +396,57 @@ uint8_t app_test_SPI_CN39_echo (void) {
 	    case HAL_OK:
 	      /* Communication is completed ___________________________________________ */
 	      /* Compare the sent and received buffers */
-	      if (memcmp((uint8_t *)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE))
+	      if (memcmp((uint8_t *)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE) == 0)
 	      {
 	        /* Transfer error in transmission process */
-	    	  dataRcv[0] = 0;
+//	    	  dataRcv[0] = 0;
+	      }
+	      /* Turn LED1 on: Transfer in transmission process is correct */
+	      break;
+
+	    case HAL_TIMEOUT:
+	      /* A Timeout Occur ______________________________________________________*/
+	      /* Call Timeout Handler */
+	      break;
+	    /* An Error Occur ______________________________________________________ */
+	    case HAL_ERROR:
+	      /* Call Timeout Handler */
+	      break;
+	    default:
+	      break;
+	  }
+
+
+	HAL_Delay(100);
+
+    return ret;
+}
+
+uint8_t app_test_SPI_CN39_echo (void) {
+
+	uint8_t ret = 0;
+
+	/* Buffer used for transmission */
+	uint8_t aTxBuffer[] = "Hello World!\r\n";
+
+	uint8_t BUFFERSIZE = sizeof(aTxBuffer)-1;
+
+	/* Buffer used for reception */
+	uint8_t aRxBuffer[BUFFERSIZE];
+
+
+	for(uint8_t ind =0; ind< sizeof(aRxBuffer); ind ++)
+		aRxBuffer[ind] = ind;
+
+	 switch (HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE, 30000))
+	  {
+	    case HAL_OK:
+	      /* Communication is completed ___________________________________________ */
+	      /* Compare the sent and received buffers */
+	      if (memcmp((uint8_t *)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE) == 0)
+	      {
+	        /* Transfer error in transmission process */
+//	    	  dataRcv[0] = 0;
 	      }
 	      /* Turn LED1 on: Transfer in transmission process is correct */
 	      break;
@@ -492,27 +508,6 @@ uint8_t app_test_I2C1_CN33_echo (void) {
 //	      Error_Handler();
 	    }
 	  }
-
-
-//	/*##-2- Put I2C peripheral in reception process ############################*/
-//	  /* Timeout is set to 10S  */
-//	  if(HAL_I2C_Slave_Receive(&hi2c1, (uint8_t *)dataRcv, 16, 10000) != HAL_OK)
-//	  {
-//	    /* Transfer error in reception process */
-////	    Error_Handler();
-//	  }
-//	  else {
-//		  /*##-3- Start the transmission process #####################################*/
-//		  /* While the I2C is in reception process, user can transmit data through
-//		     "aTxBuffer" buffer */
-//		  /* Timeout is set to 10S */
-//		  if(HAL_I2C_Slave_Transmit(&hi2c1, (uint8_t*)dataRcv, 16, 10000)!= HAL_OK)
-//		  {
-//		    /* Transfer error in transmission process */
-//	//	    Error_Handler();
-//		  }
-//	  }
-
 
 
 	HAL_Delay(10);
@@ -646,10 +641,5 @@ void app_test_manager_sm (void) {
 	if (_test.can_cn30) {
 		app_test_CAN_CN30_echo();
 	}
-
-//	HAL_UART_Transmit(&huart1, (uint8_t*)"_test variable", 14, 0xFFFF);
-//	uint8_t print[10] = {0};
-//	sprintf(print, "%d \r\n", (int)_test.spi_px30);
-//	HAL_UART_Transmit(&huart1, print, 14, 0xFFFF);
 
 }

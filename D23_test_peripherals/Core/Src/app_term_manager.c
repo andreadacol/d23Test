@@ -77,17 +77,17 @@ static void _usages_cmd (void) {
 	uint8_t cmd2[] 	= "	gpi		read current state of all input gpios \r\n";
 	uint8_t cmd3[] 	= "	gpo_square	enable-disable square output at 1 Hz (gpo_square start stop)\r\n";
 	uint8_t cmd4[] 	= "	gpi_square	read current state of all input gpios at 1 Hz (gpi_square start stop) \r\n";
-	uint8_t cmd5[] 	= "	serialCN48	start stop  \r\n";
-	uint8_t cmd6[] 	= "	mdbCN28		start stop  \r\n";
-	uint8_t cmd7[] 	= "	usart1CN32	start stop  \r\n";
-	uint8_t cmd8[] 	= "	usart5CN32	start stop  \r\n";
-	uint8_t cmd9[] 	= "	timerCN34	start stop  \r\n";
-	uint8_t cmd10[] = "	spi_px30	start stop  \r\n";
-	uint8_t cmd11[] = "	spi_cn39	start stop  \r\n";
-	uint8_t cmd12[] = "	i2c1_cn33	start stop  \r\n";
-	uint8_t cmd13[] = "	i2c2_cn33	start stop  \r\n";
-	uint8_t cmd14[] = "	can_cn30	start stop  \r\n";
-
+	uint8_t cmd5[] 	= "	serialCN48	enable-disable Hello world send-receive test (serialCN48 start stop) \r\n";
+	uint8_t cmd6[] 	= "	mdbCN28		enable-disable Hello world send-receive test (mdbCN28 start stop) \r\n";
+	uint8_t cmd7[] 	= "	usart1CN32	enable-disable Hello world send-receive test (usart1CN32 start stop) \r\n";
+	uint8_t cmd8[] 	= "	usart5CN32	enable-disable Hello world send-receive test (usart5CN32 start stop) \r\n";
+	uint8_t cmd9[] 	= "	timerCN34	enable-disable pwm square of all CN34 output (timerCN34 start stop) \r\n";
+	uint8_t cmd10[] = "	spi_px30	enable-disable Hello world send-receive test (spi_px30 start stop)  r\n";
+	uint8_t cmd11[] = "	spi_cn39	enable-disable Hello world send-receive test (spi_cn39 start stop)  \r\n";
+	uint8_t cmd12[] = "	i2c1_cn33	enable-disable string send-receive test (i2c1_cn33 start stop) \r\n";
+	uint8_t cmd13[] = "	i2c2_cn33	enable-disable string send-receive test (i2c2_cn33 start stop) \r\n";
+	uint8_t cmd14[] = "	can_cn30	enable-disable test (can_cn30 start stop) \r\n";
+	
 	_send_data(cmd0,  sizeof(cmd0));
 	_send_data(cmd1,  sizeof(cmd1));
 	_send_data(cmd2,  sizeof(cmd2));
