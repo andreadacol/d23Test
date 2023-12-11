@@ -476,16 +476,18 @@ uint8_t app_test_I2C1_CN33_echo (void) {
 	uint8_t dataRcv[16] = {0};
 	uint8_t dataTrn[16];
 
+	uint8_t retry = 0;
+
 	for (uint8_t ind = 0; ind < 16; ind++) {
 		dataTrn[ind] = ind;
 	}
 
-
 	/*##-2- Start the transmission process #####################################*/
 	/* While the I2C in reception process, user can transmit data through
 	 "aTxBuffer" buffer */
-	/* Timeout is set to 10S */
-	while(HAL_I2C_Master_Transmit(&hi2c1, (uint16_t)I2C_ADDRESS, (uint8_t*)dataTrn, 16, 1000)!= HAL_OK)
+	/* Timeout is set to 100ms */
+	while( (HAL_I2C_Master_Transmit(&hi2c1, (uint16_t)I2C_ADDRESS, (uint8_t*)dataTrn, 16, 100)!= HAL_OK) &&
+			(retry < 3) )
 	{
 		/* Error_Handler() function is called when Timeout error occurs.
 		   When Acknowledge failure occurs (Slave don't acknowledge its address)
@@ -494,20 +496,24 @@ uint8_t app_test_I2C1_CN33_echo (void) {
 		{
 //			Error_Handler();
 		}
+		retry++;
 	}
 
-	  /*##-3- Put I2C peripheral in reception process ############################*/
-	  /* Timeout is set to 10S */
-	  while(HAL_I2C_Master_Receive(&hi2c1, (uint16_t)I2C_ADDRESS, (uint8_t *)dataRcv, 16, 10000) != HAL_OK)
-	  {
-	    /* Error_Handler() function is called when Timeout error occurs.
-	       When Acknowledge failure occurs (Slave don't acknowledge it's address)
-	       Master restarts communication */
-	    if (HAL_I2C_GetError(&hi2c1) != HAL_I2C_ERROR_AF)
-	    {
-//	      Error_Handler();
-	    }
-	  }
+	retry = 0;
+	/*##-3- Put I2C peripheral in reception process ############################*/
+	/* Timeout is set to 100ms */
+	while( (HAL_I2C_Master_Receive(&hi2c1, (uint16_t)I2C_ADDRESS, (uint8_t *)dataRcv, 16, 100) != HAL_OK) &&
+			(retry < 3) )
+	{
+		/* Error_Handler() function is called when Timeout error occurs.
+		   When Acknowledge failure occurs (Slave don't acknowledge it's address)
+		   Master restarts communication */
+		if (HAL_I2C_GetError(&hi2c1) != HAL_I2C_ERROR_AF)
+		{
+		//	      Error_Handler();
+		}
+		retry++;
+	}
 
 
 	HAL_Delay(10);
@@ -522,16 +528,18 @@ uint8_t app_test_I2C2_CN33_echo (void) {
 	uint8_t dataRcv[16] = {0};
 	uint8_t dataTrn[16];
 
+	uint8_t retry = 0;
+
 	for (uint8_t ind = 0; ind < 16; ind++) {
 		dataTrn[ind] = ind;
 	}
 
-
 	/*##-2- Start the transmission process #####################################*/
 	/* While the I2C in reception process, user can transmit data through
 	 "aTxBuffer" buffer */
-	/* Timeout is set to 10S */
-	while(HAL_I2C_Master_Transmit(&hi2c2, (uint16_t)I2C_ADDRESS, (uint8_t*)dataTrn, 16, 10)!= HAL_OK)
+	/* Timeout is set to 100ms */
+	while( (HAL_I2C_Master_Transmit(&hi2c2, (uint16_t)I2C_ADDRESS, (uint8_t*)dataTrn, 16, 100)!= HAL_OK) &&
+			(retry < 3) )
 	{
 		/* Error_Handler() function is called when Timeout error occurs.
 		   When Acknowledge failure occurs (Slave don't acknowledge its address)
@@ -540,20 +548,25 @@ uint8_t app_test_I2C2_CN33_echo (void) {
 		{
 //			Error_Handler();
 		}
+		retry++;
 	}
 
-	  /*##-3- Put I2C peripheral in reception process ############################*/
-	  /* Timeout is set to 10S */
-	  while(HAL_I2C_Master_Receive(&hi2c2, (uint16_t)I2C_ADDRESS, (uint8_t *)dataRcv, 16, 10000) != HAL_OK)
-	  {
-	    /* Error_Handler() function is called when Timeout error occurs.
-	       When Acknowledge failure occurs (Slave don't acknowledge it's address)
-	       Master restarts communication */
-	    if (HAL_I2C_GetError(&hi2c2) != HAL_I2C_ERROR_AF)
-	    {
-//	      Error_Handler();
-	    }
-	  }
+	retry = 0;
+
+	/*##-3- Put I2C peripheral in reception process ############################*/
+	/* Timeout is set to 100ms */
+	while( (HAL_I2C_Master_Receive(&hi2c2, (uint16_t)I2C_ADDRESS, (uint8_t *)dataRcv, 16, 100) != HAL_OK) &
+			(retry < 3) )
+	{
+		/* Error_Handler() function is called when Timeout error occurs.
+		When Acknowledge failure occurs (Slave don't acknowledge it's address)
+		Master restarts communication */
+		if (HAL_I2C_GetError(&hi2c2) != HAL_I2C_ERROR_AF)
+		{
+		//	      Error_Handler();
+		}
+		retry++;
+	}
 
 	HAL_Delay(10);
 
@@ -602,8 +615,6 @@ uint8_t app_test_USB_CN31_stop(void) {
 }
 
 void app_test_manager_sm (void) {
-
-	_test.spi_cn39 = true;
 
 	if (_test.gpo_cn49_square) {
 		app_test_GPO_CN49_square(0);
